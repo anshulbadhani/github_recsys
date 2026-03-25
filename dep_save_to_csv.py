@@ -4,11 +4,11 @@ import pandas as pd
 # -----------------------------
 # Step 1: Load pickle
 # -----------------------------
-with open('min_freq_40_preprocessed_data.pkl', 'rb') as f:
+with open('data/min_freq_40_preprocessed_data.pkl', 'rb') as f:
     data = pickle.load(f)
 
 print("Keys in the pickle:", data.keys())
-print(f"Train object attributes: {dir(data['train'])[:10]}")  # abbreviated
+print(f"Train object attributes: {dir(data['train'])}")  # abbreviated
 print(f"Valid object attributes: {dir(data['valid'])[:10]}")
 print(f"Test object attributes: {dir(data['test'])[:10]}")
 
