@@ -1,5 +1,7 @@
 __pycache__/
 .venv/
+
+# Data
 data/
 filtered_data/
 *.csv
