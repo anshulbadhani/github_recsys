@@ -1,3 +1,8 @@
+"""
+File not relevant anymore
+TODO: Remove this later
+"""
+
 import pickle
 import pandas as pd
 
