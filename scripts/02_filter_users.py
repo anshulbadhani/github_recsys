@@ -1,9 +1,10 @@
 """
 Step 2: Filter and clean user interaction histories.
- 
+
 This script processes raw preprocessed data and extracts user interaction
 histories (which repositories each user starred).
 """
+
 import sys
 import pickle
 from pathlib import Path
@@ -19,17 +20,17 @@ config = get_config()
 with open(config.paths.get_raw_data_path(config.data.min_freq), "rb") as f:
     raw_data = pickle.load(f)
 
-SPLIT_NAME = "train" # or "test" or "valid"
-data = raw_data[SPLIT_NAME]
 
-
+data = raw_data[config.data.train_split]
 user_history = defaultdict(list)
 
 for uid, iid in zip(data.user_ids, data.item_ids):
     user_history[uid].append(iid)
 
 print(f"Total users with history: {len(user_history)}")
-print(f"Example user {list(user_history.keys())[0]} has {len(user_history[list(user_history.keys())[0]])} repos")
+print(
+    f"Example user {list(user_history.keys())[0]} has {len(user_history[list(user_history.keys())[0]])} repos"
+)
 
 
 # for embeddings
@@ -43,7 +44,7 @@ clean_data = {
     "descriptions": descriptions,
     "repo_ids_unique": repo_ids_unique,
     "num_users": len(user_history),
-    "num_repos": len(repo_ids_unique)
+    "num_repos": len(repo_ids_unique),
 }
 
 with open(config.paths.get_user_history_path(config.data.min_freq), "wb") as f:

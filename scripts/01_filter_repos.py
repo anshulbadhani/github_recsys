@@ -1,6 +1,6 @@
 """
 Step 1: Filter and clean repository metadata.
- 
+
 This script processes raw preprocessed data and extracts clean repository
 metadata including names, descriptions, and programming languages.
 """
@@ -38,21 +38,17 @@ for repo_id, desc in descriptions.items():
         continue
     # print(f"Name: {repo_name}, Language: {repo_lang}")
     prompt = repo_name + " | " + desc + " | " + str(repo_lang)
-    
+
     repos[repo_id] = {
         "repo_name": repo_name,
         "description": desc,
         "language": repo_lang,
-        "prompt": prompt
+        "prompt": prompt,
     }
 
 print(f"\n✅ Built metadata for {len(repos)} repositories")
 
 with open(config.paths.get_repo_metadata_path(config.data.min_freq), "wb") as f:
-    pickle.dump({
-        "clean_repos": repos,
-        "num_repos": len(repos)
-    }, f)
+    pickle.dump({"clean_repos": repos, "num_repos": len(repos)}, f)
 
 print(f"✅ Saved cleaned repo data to: {config.paths.get_repo_metadata_path()}")
-
