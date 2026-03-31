@@ -43,8 +43,6 @@ for repo_id, desc in descriptions.items():
 
 print(f"\n✅ Built metadata for {len(repos)} repositories")
 
-print("Example (first 3):")
-
 with open(OUTPUT_PATH, "wb") as f:
     pickle.dump({
         "clean_repos": repos,
