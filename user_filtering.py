@@ -5,7 +5,7 @@ from collections import defaultdict
 
 # Global Variables
 DATA_DIR = "./data/"
-DATA_FILE = "min_freq_160_preprocessed_data.pkl"
+DATA_FILE = "min_freq_40_preprocessed_data.pkl"
 DATA_PATH = os.path.join(DATA_DIR, DATA_FILE)
 
 OUTPUT_DIR = "./filtered_data/"
@@ -43,7 +43,7 @@ clean_data = {
     "num_repos": len(repo_ids_unique)
 }
 
-with open(OUTPUT_PATH, "wb") as f:
-    pickle.dump(clean_data, f)
+# with open(OUTPUT_PATH, "wb") as f:
+#     pickle.dump(clean_data, f)
 
 print(f"Clean user history saved to {OUTPUT_PATH}")
