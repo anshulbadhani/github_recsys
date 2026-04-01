@@ -5,16 +5,9 @@ This script processes raw preprocessed data and extracts user interaction
 histories (which repositories each user starred).
 """
 
-import sys
 import pickle
-from pathlib import Path
 from collections import defaultdict
-
-
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
-
-from config import get_config
+from recsys.config import get_config
 
 config = get_config()
 with open(config.paths.get_raw_data_path(config.data.min_freq), "rb") as f:

@@ -5,17 +5,9 @@ This script runs sanity checks on the generated embeddings and demonstrates
 how to use them for making recommendations.
 """
 
-import sys
-from pathlib import Path
 import pickle
 import numpy as np
-from collections import Counter
-
-# Add project root to path
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
-
-from config import get_config
+from recsys.config import get_config
 
 
 def load_embeddings(config):

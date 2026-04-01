@@ -5,16 +5,8 @@ This script processes raw preprocessed data and extracts clean repository
 metadata including names, descriptions, and programming languages.
 """
 
-import sys
 import pickle
-from pathlib import Path
-
-
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
-
-
-from config import get_config
+from recsys.config import get_config
 
 config = get_config()
 
@@ -48,7 +40,7 @@ for repo_id, desc in descriptions.items():
 
 print(f"\n✅ Built metadata for {len(repos)} repositories")
 
-with open(config.paths.get_repo_metadata_path(config.data.min_freq), "wb") as f:
-    pickle.dump({"clean_repos": repos, "num_repos": len(repos)}, f)
+# with open(config.paths.get_repo_metadata_path(config.data.min_freq), "wb") as f:
+#     pickle.dump({"clean_repos": repos, "num_repos": len(repos)}, f)
 
 print(f"✅ Saved cleaned repo data to: {config.paths.get_repo_metadata_path()}")

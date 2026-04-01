@@ -5,16 +5,10 @@ This script generates dense vector embeddings for each repository using
 a sentence transformer model on the repo name, description, and language.
 """
 
-import sys
 import pickle
 import tqdm
-from pathlib import Path
 from sentence_transformers import SentenceTransformer
-
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
-
-from config import get_config
+from recsys.config import get_config
 
 config = get_config()
 model = SentenceTransformer(

@@ -13,7 +13,7 @@ class PathConfig:
     """Configuration for all file paths in the project."""
 
     # Directories
-    project_root: Path = Path(__file__).parent.parent
+    project_root: Path = Path(__file__).parent.parent.parent
     data_dir: Path = field(
         init=False
     )  # init=False means do not handle in the constructor itself
@@ -92,7 +92,7 @@ class ModelConfig:
     # Embedding model
     embedding_model_name: str = "all-MiniLM-L6-v2"
     embedding_dim: int = 384
-    device: str = "auto"  # "cpu", "cuda", "openvino", "auto"
+    device: str = "cpu"  # "cpu", "cuda", "openvino", "auto"
     batch_size: int = 64
     normalize_embeddings: bool = True
 
