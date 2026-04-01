@@ -36,11 +36,15 @@ class FaissRetriver:
             self.load_index()
 
     def load_index(self):
+        # TODO: Implement load_index funtion
+        self.is_loaded = False
         pass
 
     def build_index(self, force_rebuild=False):
+        self.is_loaded = False
         if not force_rebuild:
             self.load_index()
+            self.is_loaded = True
             return
         else:
             with open(self.config.paths.get_repo_embeddings_path("cpu"), "rb") as f:
@@ -56,7 +60,7 @@ class FaissRetriver:
         # train index if ivf or ivfpq
 
         self.index.add_with_ids(self.repo_embeddings, self.repo_ids) # type: ignore
-
+        self.is_loaded = True
 
     def search(self, query_embedding, k=5):
         query = np.array(query_embedding, dtype="float32").reshape(1, -1)
