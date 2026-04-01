@@ -27,6 +27,8 @@ class PathConfig:
     users_dir: Path = field(init=False)
 
     embeddings_dir: Path = field(init=False)
+    
+    faiss_index_dir: Path = field(init=False)
 
     def __post_init__(self):
         """
@@ -45,6 +47,8 @@ class PathConfig:
         self.users_dir = self.processed_data_dir / "users"
 
         self.embeddings_dir = self.data_dir / "embeddings"
+        
+        self.faiss_index_dir = self.data_dir / "faiss_index"
 
     def get_raw_data_path(self, min_freq: int = 160) -> Path:
         """Get path to raw preprocessed data."""
@@ -69,6 +73,10 @@ class PathConfig:
     def get_csv_output_path(self, split: str) -> Path:
         """Get path for stats or logs or others."""
         return self.outputs_dir / f"{split}.csv"
+    
+    def get_faiss_index_path(self, min_freq: int = 160) -> Path:
+        """Get path for FAISS indexes."""
+        return self.faiss_index_dir / f"index_{min_freq}.pkl"
 
     def ensure_dirs(self):
         """Create all necessary directories."""
@@ -80,6 +88,7 @@ class PathConfig:
             self.users_dir,
             self.embeddings_dir,
             self.outputs_dir,
+            self.faiss_index_dir
         ]
         for dir_path in dirs:
             dir_path.mkdir(parents=True, exist_ok=True)
