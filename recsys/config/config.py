@@ -74,9 +74,12 @@ class PathConfig:
         """Get path for stats or logs or others."""
         return self.outputs_dir / f"{split}.csv"
     
-    def get_faiss_index_path(self, min_freq: int = 160) -> Path:
-        """Get path for FAISS indexes."""
-        return self.faiss_index_dir / f"index_{min_freq}.pkl"
+    def get_faiss_index_path(self, min_freq: int = 160, method="IndexFlatIP") -> Path:
+        """
+        Get path for FAISS indexes.
+        For consistency better use the exact index building function name
+        """
+        return self.faiss_index_dir / f"index_{min_freq}_{method}.pkl"
 
     def ensure_dirs(self):
         """Create all necessary directories."""

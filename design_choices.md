@@ -33,3 +33,7 @@ Here comes the system engg part, like how to deploy all of this nd all. Then com
 - PySpark (it is like SQL but with python... good stuff, if I scale this too much)
 
 **And I am thinking to not include any bandit libraries as such. As I think it is trivial enough to do it if I can and would help me in my semester project too :skull:**
+
+
+## Dumb Issues I am encountering
+- How and when to write into the faiss.index file? Such that I dont store duplicate repositories in my db
