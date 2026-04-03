@@ -37,3 +37,12 @@ Here comes the system engg part, like how to deploy all of this nd all. Then com
 
 ## Dumb Issues I am encountering
 - How and when to write into the faiss.index file? Such that I dont store duplicate repositories in my db
+
+
+
+## 2.5 Filtering – The bloom filter
+- Suppose a user who is using our application for more than two years would have seen many many repositories which interest them. So, it might not be okay to show them the same recomendations again and again.
+- For applications like music apps. It would be fine to recommend music which a certain user already likes, or in case of searching through a list of items, then we won't need any filter as such
+- For our use cases, it would be better if I implement a filter as such.
+- For my use case, I have two choices, either to use a `Bloom Filter` or `LRU Cache`. For prototyping a `Bloom Filter` might be fine but for something real `LRU Cache` seems a more real option. Since, both are not very difficult for one to understand. I will be implementing them both.
+- For prototyping phase, we will be using python's memory itself. But we can always move this to a database if needed
