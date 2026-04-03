@@ -134,9 +134,8 @@ class FaissRetriever:
         return D, I
     
 if __name__ == "__main__":
-    # Ensure you are running this from the root of your project
     config = get_config()
-    retriever = FaissRetriever(config) # Notice the spelling fix
+    retriever = FaissRetriever(config)
     retriever.build_index(force_rebuild=True)
 
     # Pick a random repo embedding as query to test vector search
