@@ -219,8 +219,8 @@ class NeuralUCB:
         self.optimizer.step()
 
         # Track stats
+        self.total_loss += loss.item() * len(rewards)
         self.update_count += len(rewards)
-        self.total_loss += loss.item()
 
     def get_average_loss(self) -> float:
         """Get average loss since last reset."""

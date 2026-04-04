@@ -78,6 +78,7 @@ class BloomFilter:
 if __name__ == "__main__":
     # Expecting 100 interactions, 1% false positive rate
     bf = BloomFilter(expected_items=100, false_positive_rate=0.01)
+    print(bf.bit_arr_size)
 
     # 1. User 10 stars Repo 404 and 505
     bf.add(10, 404) # type: ignore
