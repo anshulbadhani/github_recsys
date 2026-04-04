@@ -30,6 +30,7 @@ class FaissRetriever:
         self.repo_embeddings = None  # numpy matrix for FAISS
         self.user_embeddings = None  # numpy matrix
         self.user_embeddings_map = None # Dictionary for fast user lookups
+        self.repo_embeddings_map = None
         
         self.is_loaded = False
         
@@ -38,6 +39,11 @@ class FaissRetriever:
 
         if Path(self.config.paths.get_faiss_index_path()).exists():
             self.load_index()
+            
+        self.__post_init__()
+            
+    def __post_init__(self):
+        self._load_embeddings()
             
     def _load_user_embeddings(self):
         with open(self.config.paths.get_user_embeddings_path(self.config.model.device), "rb") as f:
@@ -51,11 +57,11 @@ class FaissRetriever:
             repo_data = pickle.load(f)
             
         # 1. Extract the INNER dictionary
-        repo_embeddings_map = repo_data["repo_embeddings"]
+        self.repo_embeddings_map = repo_data["repo_embeddings"]
         
         # 2. Get keys and values from the INNER dictionary
-        self.repo_ids = np.array(list(repo_embeddings_map.keys()), dtype=np.int64)
-        self.repo_embeddings = np.array(list(repo_embeddings_map.values()), dtype="float32")
+        self.repo_ids = np.array(list(self.repo_embeddings_map.keys()), dtype=np.int64)
+        self.repo_embeddings = np.array(list(self.repo_embeddings_map.values()), dtype="float32")
     
     def _load_embeddings(self):
         self._load_repo_embeddgings()
@@ -88,7 +94,7 @@ class FaissRetriever:
         if self.normalize_embeddings:
             faiss.normalize_L2(self.repo_embeddings)
         
-        base_index = faiss.IndexFlatIP(self.repo_embeddings.shape[1])
+        base_index = faiss.IndexFlatIP(self.repo_embeddings.shape[1]) # type: ignore
         self.index = faiss.IndexIDMap(base_index)
 
         # train index if ivf or ivfpq
@@ -112,7 +118,7 @@ class FaissRetriever:
         query_embedding = self.user_embeddings[uid_np] # pyright: ignore[reportOptionalSubscript]
         
         # Ensure the vector is float32 for FAISS
-        return self.search_by_vector(query_embedding.astype("float32"), k)
+        return self.search_by_vector(query_embedding.astype("float32"), k) # type: ignore
 
     def search_by_vector(self, query_embedding, k=5):
         query = np.array(query_embedding, dtype="float32").reshape(1, -1)
@@ -139,7 +145,7 @@ if __name__ == "__main__":
     retriever.build_index(force_rebuild=True)
 
     # Pick a random repo embedding as query to test vector search
-    query = retriever.repo_embeddings[0] 
+    query = retriever.repo_embeddings[0] # type: ignore
 
     D, I = retriever.search_by_vector(query, k=100)
 
