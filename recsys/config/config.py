@@ -29,6 +29,8 @@ class PathConfig:
     embeddings_dir: Path = field(init=False)
     
     faiss_index_dir: Path = field(init=False)
+    
+    weights_dir: Path = field(init=False)
 
     def __post_init__(self):
         """
@@ -49,6 +51,8 @@ class PathConfig:
         self.embeddings_dir = self.data_dir / "embeddings"
         
         self.faiss_index_dir = self.data_dir / "faiss_index"
+        
+        self.weights_dir = self.data_dir / "weights"
 
     def get_raw_data_path(self, min_freq: int = 160) -> Path:
         """Get path to raw preprocessed data."""
@@ -80,6 +84,13 @@ class PathConfig:
         For consistency better use the exact index building function name
         """
         return self.faiss_index_dir / f"index_{min_freq}_{method}.pkl"
+    
+    def get_weights_path(self, min_freq: int = 160) -> Path:
+        """
+        Get Path for UCB weights
+        """
+        return self.weights_dir / f"weights_{min_freq}.pt"
+        
 
     def ensure_dirs(self):
         """Create all necessary directories."""
@@ -91,7 +102,8 @@ class PathConfig:
             self.users_dir,
             self.embeddings_dir,
             self.outputs_dir,
-            self.faiss_index_dir
+            self.faiss_index_dir,
+            self.weights_dir,
         ]
         for dir_path in dirs:
             dir_path.mkdir(parents=True, exist_ok=True)

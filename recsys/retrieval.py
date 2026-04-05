@@ -10,7 +10,7 @@ from typing import List, Dict
 
 import faiss
 
-from config import get_config, Config
+from recsys.config import get_config, Config
 
 
 class FaissRetriever:
@@ -18,7 +18,7 @@ class FaissRetriever:
         """
         Parameters:
             - config : Config
-                For FaissRetriver to know about paths of different files for I/O
+                For FaissRetrieval to know about paths of different files for I/O
             - index: faiss.Index*
                 The actual FAISS index object
         """

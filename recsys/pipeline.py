@@ -1,6 +1,6 @@
 import numpy as np
 from recsys.config import get_config, Config
-from recsys.retrival import FaissRetriever
+from recsys.retrieval import FaissRetriever
 from recsys.bandits.neuralucb import NeuralUCB
 from recsys.bloom_filter import BloomFilter
 
@@ -8,20 +8,20 @@ from recsys.bloom_filter import BloomFilter
 class GitHubRecommender:
     """
     The main class which actually gives recommendations from the real data.
-    This class encapsulates all the classes (Faiss Retriver, NeuralUCB, BloomFilter etc),
+    This class encapsulates all the classes (Faiss Retrieval, NeuralUCB, BloomFilter etc),
     which are made till now.
     """
 
     def __init__(self, config: Config) -> None:
         self.config = config
-        self.retriver = FaissRetriever(config)
+        self.retriever = FaissRetriever(config)
         self.bandit = NeuralUCB(device=config.model.device)
         self.filter = BloomFilter(100000, 0.01)
         self.__post_init__()
 
     def __post_init__(self):
         """Loads everything into the memeory"""
-        self.retriver.build_index(force_rebuild=False)
+        self.retriever.build_index(force_rebuild=False)
 
     def recommend(self, user_id: int, top_k: int = 10):  # add top_k in config.model.top_k
         """
@@ -34,11 +34,11 @@ class GitHubRecommender:
         Returns:
             Array of top-k repo IDs
         """
-        if user_id not in self.retriver.user_ids: # type: ignore
+        if user_id not in self.retriever.user_ids: # type: ignore
             raise ValueError(f"User {user_id} not found in embeddings")
 
-        user_emb = self.retriver.user_embeddings_map[user_id]  # type: ignore # as it exists becasue of __post_init__() method
-        _, candidate_ids = self.retriver.search_by_user(user_id=user_id, k=top_k * 50)
+        user_emb = self.retriever.user_embeddings_map[user_id]  # type: ignore # as it exists becasue of __post_init__() method
+        _, candidate_ids = self.retriever.search_by_user(user_id=user_id, k=top_k * 50)
 
         if candidate_ids.ndim == 2: # type: ignore
             candidate_ids = candidate_ids.flatten()  # (1, k) → (k,) # type: ignore
@@ -60,8 +60,8 @@ class GitHubRecommender:
 
         for repo_id in candidates_to_score:
             repo_id_key = int(repo_id)
-            if repo_id_key in self.retriver.repo_embeddings_map: # type: ignore
-                repo_embs.append(self.retriver.repo_embeddings_map[repo_id_key]) # type: ignore
+            if repo_id_key in self.retriever.repo_embeddings_map: # type: ignore
+                repo_embs.append(self.retriever.repo_embeddings_map[repo_id_key]) # type: ignore
                 valid_candidates.append(repo_id_key)
             else:
                 print(f"Warning: Repo {repo_id_key} not found in embeddings")
@@ -74,6 +74,11 @@ class GitHubRecommender:
         
 
         ucb_scores = self.bandit.score(user_emb=user_emb, item_embs=repo_embs)  # type: ignore
+        print(f"\n=== DEBUG User {user_id} ===")
+        print(f"Number of candidates scored: {len(ucb_scores)}")
+        print(f"UCB Score stats - Min: {ucb_scores.min():.4f}, Max: {ucb_scores.max():.4f}, Std: {ucb_scores.std():.4f}")
+        print(f"Top 8 UCB scores : {np.sort(ucb_scores)[-8:][::-1]}")
+        print(f"Top 10 recommended repos: {valid_candidates[np.argsort(ucb_scores)[-10:][::-1]]}")
 
         return self.bandit.pick_top_k(ucb_scores, valid_candidates, k=top_k)
 
@@ -87,8 +92,8 @@ class GitHubRecommender:
             reward: 1.0 if starred/clicked, 0.0 if ignored
         """
         # Get embeddings
-        user_emb = self.retriver.user_embeddings_map[user_id] # type: ignore
-        repo_emb = self.retriver.repo_embeddings_map[int(repo_id)] # type: ignore
+        user_emb = self.retriever.user_embeddings_map[user_id] # type: ignore
+        repo_emb = self.retriever.repo_embeddings_map[int(repo_id)] # type: ignore
         
         # Update bandit
         self.bandit.update(user_emb, repo_emb, reward)
@@ -105,7 +110,7 @@ if __name__ == "__main__":
     # --- SIMULATE A USER SESSION ---
 
     # Let's grab a real user ID from your dataset
-    test_user_id = recommender.retriver.user_ids[4] # type: ignore
+    test_user_id = recommender.retriever.user_ids[4] # type: ignore
 
     print(f"\n[SESSION START] User {test_user_id} logs in.")
 

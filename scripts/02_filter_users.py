@@ -14,7 +14,7 @@ with open(config.paths.get_raw_data_path(config.data.min_freq), "rb") as f:
     raw_data = pickle.load(f)
 
 
-data = raw_data[config.data.train_split]
+data = raw_data[config.data.test_split]
 user_history = defaultdict(list)
 
 for uid, iid in zip(data.user_ids, data.item_ids):
@@ -40,7 +40,7 @@ clean_data = {
     "num_repos": len(repo_ids_unique),
 }
 
-with open(config.paths.get_user_history_path(config.data.min_freq), "wb") as f:
+with open(str(config.paths.get_user_history_path(config.data.min_freq))+"_test", "wb") as f:
     pickle.dump(clean_data, f)
 
 print(f"Clean user history saved to {config.paths.get_user_history_path()}")

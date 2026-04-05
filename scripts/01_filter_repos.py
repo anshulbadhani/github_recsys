@@ -40,7 +40,7 @@ for repo_id, desc in descriptions.items():
 
 print(f"\n✅ Built metadata for {len(repos)} repositories")
 
-# with open(config.paths.get_repo_metadata_path(config.data.min_freq), "wb") as f:
-#     pickle.dump({"clean_repos": repos, "num_repos": len(repos)}, f)
+with open(str(config.paths.get_repo_metadata_path(config.data.min_freq)), "wb") as f:
+    pickle.dump({"clean_repos": repos, "num_repos": len(repos)}, f)
 
 print(f"✅ Saved cleaned repo data to: {config.paths.get_repo_metadata_path()}")

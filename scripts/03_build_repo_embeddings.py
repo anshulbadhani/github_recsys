@@ -38,7 +38,7 @@ for repo_id, info in tqdm.tqdm(clean_repos.items()):
     repo_embeddings[repo_id] = embedding
 
 
-with open(config.paths.get_repo_embeddings_path(), "wb") as f:
+with open(str(config.paths.get_repo_embeddings_path()), "wb") as f:
     pickle.dump(
         {
             "repo_embeddings": repo_embeddings,

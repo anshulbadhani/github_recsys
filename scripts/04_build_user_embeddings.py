@@ -6,10 +6,10 @@ from recsys.config import get_config
 
 config = get_config()
 
-with open(config.paths.get_user_history_path(config.data.min_freq), "rb") as f:
+with open(str(config.paths.data_dir)+"/processed/users/min_freq_160_cleaned_users_test.pkl", "rb") as f:
     users_data = pickle.load(f)
 
-with open(config.paths.get_repo_metadata_path(config.data.min_freq), "rb") as f:
+with open(config.paths.get_repo_embeddings_path(config.model.device), "rb") as f:
     repo_data = pickle.load(f)
 
 
@@ -34,7 +34,7 @@ for user_id, history in tqdm.tqdm(user_history.items()):
     user_context_vectors[user_id] = user_vec
 
 
-with open(config.paths.get_user_embeddings_path(), "wb") as f:
+with open(str(config.paths.get_user_embeddings_path())+"_test", "wb") as f:
     pickle.dump(
         {
             "user_context_vectors": user_context_vectors,
