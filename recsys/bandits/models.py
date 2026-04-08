@@ -35,11 +35,15 @@ class RewardModel(nn.Module):
 
         for hidden_dim in hidden_dims:
             layers.append(nn.Linear(prev_dim, hidden_dim))
+            layers.append(nn.ReLU())
+            layers.append(nn.Dropout(dropout_rate))
             prev_dim = hidden_dim
 
         # the output is a single number for reward modeling
         layers.append(nn.Linear(prev_dim, 1))
         self.network = nn.Sequential(*layers)  # *args – Unpacking ho rhi hai
+        
+        self._init_weights()
 
     def _init_weights(self):
         """Xavier initialization for better convergence."""

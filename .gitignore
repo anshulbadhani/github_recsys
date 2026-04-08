@@ -7,4 +7,11 @@ data/
 filtered_data/
 *.csv
 outputs/
+
+# test files (for small tests)
 test.py
+archive/
+
+# others
+todo.md
+design_choices.md

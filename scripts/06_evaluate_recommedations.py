@@ -1,4 +1,5 @@
 """
+AI
 Evaluation script - Run offline evaluation on test users.
 """
 
@@ -24,7 +25,7 @@ def main():
     print("\nStarting evaluation on test users...")
     results = evaluator.evaluate(
         recommender,
-        n_users=1000 ,          # Start small, then increase to 500 / 1000+
+        n_users=10,          # Balanced for debugging
         epochs=5,
         k_values=[5, 10, 20]
     )

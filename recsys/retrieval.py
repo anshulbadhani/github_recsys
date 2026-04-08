@@ -10,6 +10,7 @@ from typing import List, Dict
 
 import faiss
 
+from typing import List, Dict, Tuple
 from recsys.config import get_config, Config
 
 
@@ -104,21 +105,18 @@ class FaissRetriever:
         self.save_index()
         self.is_loaded = True
 
-    def search_by_user(self, user_id: int, k: int = 100) -> List[Dict[str, float]]:
+    def search_by_user(self, user_id: int, k: int = 100) -> Tuple[np.ndarray, np.ndarray]:
         if not self.is_loaded:
             raise ValueError("FAISS index is not loaded. Call build_index() first.")
 
-        # CAST the Python int to np.int32 to match your dictionary keys! Just to avoid errors
-        uid_np = np.int32(user_id)
-
-        if uid_np not in self.user_embeddings_map: # pyright: ignore[reportOperatorIssue]
+        if user_id not in self.user_embeddings_map:
             print(f"User {user_id} not found in embeddings. Cold start required.")
-            return[]
+            return np.array([]), np.array([])
 
-        query_embedding = self.user_embeddings[uid_np] # pyright: ignore[reportOptionalSubscript]
+        query_embedding = self.user_embeddings_map[user_id]
         
         # Ensure the vector is float32 for FAISS
-        return self.search_by_vector(query_embedding.astype("float32"), k) # type: ignore
+        return self.search_by_vector(query_embedding.astype("float32"), k)
 
     def search_by_vector(self, query_embedding, k=5):
         query = np.array(query_embedding, dtype="float32").reshape(1, -1)

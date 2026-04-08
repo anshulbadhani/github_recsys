@@ -28,7 +28,7 @@ class NeuralUCB:
         input_dim: int = 768,
         hidden_dims: Tuple[int, ...] = (256, 64),
         dropout_rate: float = 0.2,
-        beta: float = 0.5,
+        beta: float = 5,
         learning_rate: float = 1e-3,
         device: str = "cpu",
         n_uncertainty_samples: int = 20,
@@ -54,7 +54,7 @@ class NeuralUCB:
         ).to(device)
 
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=learning_rate)
-        self.criterion = nn.MSELoss()
+        self.criterion = nn.BCEWithLogitsLoss()
 
         # Training stats
         self.update_count = 0
@@ -100,7 +100,8 @@ class NeuralUCB:
 
         with torch.no_grad():
             for _ in range(self.n_uncertainty_samples):
-                pred = self.model(x).squeeze(-1)  # (N,)
+                logits = self.model(x).squeeze(-1)  # (N,)
+                pred = torch.sigmoid(logits)        # (N,)
                 predictions.append(pred.cpu().numpy())
 
         predictions = np.array(predictions)  # (n_samples, N)

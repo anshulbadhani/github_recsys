@@ -121,7 +121,8 @@ class OfflineEvaluator:
         with open(repo_path, 'rb') as f:
             self.repo_data = pickle.load(f)
         
-        print(f"Loaded {len(self.user_data)} TEST users and {len(self.repo_data)} repos")
+        repos = self.repo_data.get('clean_repos', self.repo_data)
+        print(f"Loaded {len(self.user_data)} TEST users and {len(repos)} repos")
     
     def train_test_split(
         self, 
@@ -178,6 +179,7 @@ class OfflineEvaluator:
             user_ids = user_ids[:n_users]
 
         print(f"Selected {len(user_ids)} users for training")
+        repo_list = list(repo_emb_map.keys())
 
         for epoch in range(epochs):
             print(f"\nEpoch {epoch+1}/{epochs}")
@@ -189,13 +191,23 @@ class OfflineEvaluator:
                 if user_id not in user_emb_map:
                     continue
                 user_emb = user_emb_map[user_id]
-                starred = user_history[user_id]
+                starred = set(user_history[user_id])
 
                 for repo_id in starred:
                     if repo_id in repo_emb_map:
+                        # Positive Sample
                         batch_user.append(user_emb)
                         batch_repo.append(repo_emb_map[repo_id])
                         batch_reward.append(1.0)
+
+                        # Negative Sample (Random)
+                        neg_id = np.random.choice(repo_list)
+                        while neg_id in starred:
+                            neg_id = np.random.choice(repo_list)
+                        
+                        batch_user.append(user_emb)
+                        batch_repo.append(repo_emb_map[neg_id])
+                        batch_reward.append(0.0)
 
                         if len(batch_reward) >= 4096:   # larger batch
                             recommender.bandit.batch_update(
@@ -254,9 +266,9 @@ class OfflineEvaluator:
         # Generate recommendations
         try:
             recommendations = recommender.recommend(user_id, top_k=max(k_values))
-            print(f"\n=== DEBUG User {user_id} ===")
-            print(f"Top 10 recommended: {list(recommendations[:10])}")
-            print(f"Ground truth (test): {test_repos[:15]}")
+            # print(f"\n=== DEBUG User {user_id} ===")
+            # print(f"Top 10 recommended: {list(recommendations[:10])}")
+            # print(f"Ground truth (test): {test_repos[:15]}")
             if hasattr(recommender, 'bandit') and hasattr(recommender.retriever, 'repo_embeddings_map'):
                 div = self.diversity_metrics.intra_list_diversity(
                     recommendations[:20], recommender.retriever.repo_embeddings_map
@@ -292,6 +304,7 @@ class OfflineEvaluator:
         recommender,
         n_users: int = 7000,
         epochs: int = 30,
+        beta: float = 20,
         k_values: List[int] = [5, 10]
     ) -> EvaluationResults:
         """
@@ -305,9 +318,8 @@ class OfflineEvaluator:
         Returns:
             EvaluationResults object
         """
-        recommender.bandit.load(self.config.paths.get_weights_path())
-        # self.train_bandit(recommender, n_users=n_users, epochs=epochs)
-        # recommender.bandit.save(self.config.paths.get_weights_path())
+        self.train_bandit(recommender, n_users=n_users, epochs=epochs)
+        recommender.bandit.save(self.config.paths.get_weights_path())
         print("\n" + "="*60)
         print("STARTING OFFLINE EVALUATION")
         print("="*60)
@@ -345,29 +357,29 @@ class OfflineEvaluator:
         # Aggregate metrics
         results = EvaluationResults()
         
-        for k in k_values:
-            setattr(results, f'hit_at_{k}', np.mean([m[f'hit@{k}'] for m in all_metrics]))
-            setattr(results, f'precision_at_{k}', np.mean([m[f'precision@{k}'] for m in all_metrics]))
-            setattr(results, f'recall_at_{k}', np.mean([m[f'recall@{k}'] for m in all_metrics]))
-            setattr(results, f'ndcg_at_{k}', np.mean([m[f'ndcg@{k}'] for m in all_metrics]))
+        # Only aggregate for k=5 and k=10 as defined in EvaluationResults
+        for k in [5, 10]:
+            if f'hit@{k}' in all_metrics[0]:
+                setattr(results, f'hit_at_{k}', np.mean([m[f'hit@{k}'] for m in all_metrics]))
+                setattr(results, f'precision_at_{k}', np.mean([m[f'precision@{k}'] for m in all_metrics]))
+                setattr(results, f'recall_at_{k}', np.mean([m[f'recall@{k}'] for m in all_metrics]))
+                setattr(results, f'ndcg_at_{k}', np.mean([m[f'ndcg@{k}'] for m in all_metrics]))
         
         results.mrr = np.mean([m['mrr'] for m in all_metrics])
         results.map_score = np.mean([m['map'] for m in all_metrics])
         
         # Diversity metrics
-        if len(all_recommendations) > 0 and hasattr(recommender, 'repo_embeddings_map'):
+        if len(all_recommendations) > 0:
+            repo_map = recommender.retriever.repo_embeddings_map
             diversities = []
             for recs in all_recommendations:
-                div = self.diversity_metrics.intra_list_diversity(
-                    recs, 
-                    recommender.retriever.repo_embeddings_map
-                )
+                div = self.diversity_metrics.intra_list_diversity(recs, repo_map)
                 diversities.append(div)
             results.intra_list_diversity = np.mean(diversities)
         
         results.catalog_coverage = self.diversity_metrics.catalog_coverage(
             all_recommendations, 
-            len(self.repo_data)
+            len(self.repo_data.get('clean_repos', self.repo_data))
         )
         
         results.gini_coefficient = self.diversity_metrics.gini_coefficient(
